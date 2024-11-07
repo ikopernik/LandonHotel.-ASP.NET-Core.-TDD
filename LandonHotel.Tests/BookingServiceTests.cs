@@ -1,113 +1,52 @@
-﻿using LandonHotel.Services;
+using System;
 using LandonHotel.Data;
 using LandonHotel.Repositories;
+using LandonHotel.Services;
 using Moq;
+using Xunit;
 
 namespace LandonHotel.Tests
 {
     public class BookingServiceTests
     {
-        private Mock<IRoomsRepository> _roomsRepo;
+        private Mock<IRoomsRepository> roomRepo;
+        private Mock<ICouponRepository> couponRepo;
 
         public BookingServiceTests()
         {
-            _roomsRepo = new Mock<IRoomsRepository>();
-            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room());
+            roomRepo = new Mock<IRoomsRepository>();
+            couponRepo = new Mock<ICouponRepository>();
         }
 
-        private BookingService Subject()
+        public BookingService Subject()
         {
-            return new BookingService(null, _roomsRepo.Object);
+            return new BookingService(roomRepo.Object, couponRepo.Object);
         }
 
         [Fact]
-        public void IsBookingValid_NonSmoker_Valid()
+        public void CalculateBookingPrice_CalculatesCorrectly()
         {
             var service = Subject();
-            var isValid = service.IsBookingValid(
-                1,
-                new Booking
-                {
-                    IsSmoking = false
-                });
 
-            Assert.True(isValid);
+            roomRepo.Setup(r => r.GetRoom(1)).Returns(new Room { Rate = 250 });
+
+            var price = service.CalculateBookingPrice(new Booking { RoomId = 1, CheckInDate = DateTime.Now, CheckOutDate = DateTime.Now.AddDays(2) });
+
+            Assert.Equal(500, price);
         }
 
         [Fact]
-        public void IsBookingValid_Smoker_Invalid()
+        public void CalculateBookingPrice_DiscountsCouponCode()
         {
             var service = Subject();
-            var isValid = service.IsBookingValid(
-                1,
-                new Booking
-                {
-                    IsSmoking = true
-                });
 
-            Assert.False(isValid);
+            roomRepo.Setup(r => r.GetRoom(1)).Returns(new Room { Rate = 250 });
+            couponRepo.Setup(r => r.GetCoupon("10OFF")).Returns(new Coupon() {PercentageDiscount = 10});
+
+            var price = service.CalculateBookingPrice(new Booking { RoomId = 1, CheckInDate = DateTime.Now, CheckOutDate = DateTime.Now.AddDays(2), CouponCode = "10OFF"});
+
+            Assert.Equal(450, price);
         }
 
-        [Theory]
-        [InlineData(false, true, false)]
-        [InlineData(false, false, true)]
-        [InlineData(true, true, true)]
-        [InlineData(true, false, true)]
-
-        public void IsBookingValid_Pets(bool areAllowed, bool hasPets, bool result)
-        {
-            var service = Subject();
-            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
-            {
-                ArePetsAllowed = areAllowed
-            });
-
-            var isValid = service.IsBookingValid(
-                1,
-                new Booking
-                {
-                    HasPets = hasPets
-                });
-
-            Assert.Equal(isValid, result);
-        }
-
-        [Fact]
-        public void IsBookingValid_GuestsFitCapacity_Valid()
-        {
-            var service = Subject();
-            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
-            {
-                Capacity = 4
-            });
-
-            var isValid = service.IsBookingValid(
-                1,
-                new Booking
-                {
-                    NumberOfGuests = 1
-                });
-
-            Assert.True(isValid);
-        }
-
-        [Fact]
-        public void IsBookingValid_GuestsDontFitCapacity_Invalid()
-        {
-            var service = Subject();
-            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
-            {
-                Capacity = 4
-            });
-
-            var isValid = service.IsBookingValid(
-                1,
-                new Booking
-                {
-                    NumberOfGuests = 10
-                });
-
-            Assert.False(isValid);
-        }
     }
 }
