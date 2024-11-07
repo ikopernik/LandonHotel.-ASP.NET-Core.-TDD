@@ -21,7 +21,12 @@ namespace LandonHotel.Services
 
             var room = _roomsRepo.GetRoom(roomId);
 
-            if (booking.HasPets && !room.ArePetsAllowed)
+            if (numberOfGuests > room.Capacity)
+            {
+                return false;
+            }
+
+            if (guestIsBringingPets && !room.ArePetsAllowed)
             {
                 return false;
             }
