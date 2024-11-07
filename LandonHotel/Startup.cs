@@ -24,6 +24,7 @@ namespace LandonHotel
             services.AddMvc();
             services.AddTransient<IRoomService, RoomService>();
             services.AddTransient<IBookingService, BookingService>();
+            services.AddTransient<IBookingsRepository, BookingsRepository>();
             services.AddTransient<IRoomsRepository, RoomsRepository>();
         }
 
