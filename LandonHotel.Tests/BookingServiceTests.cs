@@ -7,22 +7,22 @@ namespace LandonHotel.Tests
 {
     public class BookingServiceTests
     {
-        private Mock<IRoomsRepository> _roomRepo;
+        private Mock<IRoomsRepository> _roomsRepo;
 
         public BookingServiceTests()
         {
-            _roomRepo = new Mock<IRoomsRepository>();
+            _roomsRepo = new Mock<IRoomsRepository>();
         }
 
         private BookingService Subject()
         {
-            return new BookingService(null, _roomRepo.Object);
+            return new BookingService(null, _roomsRepo.Object);
         }
 
         [Fact]
         public void IsBookingValid_NonSmoker_Valid()
         {
-            var service = new BookingService(null, null);
+            var service = Subject();
             var isValid = service.IsBookingValid(
                 1,
                 new Booking
@@ -36,7 +36,7 @@ namespace LandonHotel.Tests
         [Fact]
         public void IsBookingValid_Smoker_Invalid()
         {
-            var service = new BookingService(null, null);
+            var service = Subject();
             var isValid = service.IsBookingValid(
                 1,
                 new Booking
@@ -51,7 +51,7 @@ namespace LandonHotel.Tests
         public void IsBookingValid_PetsNotAllowed_Invalid()
         {
             var service = Subject();
-            _roomRepo.Setup(x => x.GetRoom(1)).Returns(new Room
+            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
             {
                 ArePetsAllowed = false
             });
@@ -64,6 +64,63 @@ namespace LandonHotel.Tests
                 });
 
             Assert.False(isValid);
+        }
+
+        [Fact]
+        public void IsBookingValid_NoPetsNotAllowed_IsValid()
+        {
+            var service = Subject();
+            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
+            {
+                ArePetsAllowed = false
+            });
+
+            var isValid = service.IsBookingValid(
+                1,
+                new Booking
+                {
+                    HasPets = false
+                });
+
+            Assert.True(isValid);
+        }
+
+        [Fact]
+        public void IsBookingValid_NoPetsAllowed_IsValid()
+        {
+            var service = Subject();
+            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
+            {
+                ArePetsAllowed = true
+            });
+
+            var isValid = service.IsBookingValid(
+                1,
+                new Booking
+                {
+                    HasPets = false
+                });
+
+            Assert.True(isValid);
+        }
+
+        [Fact]
+        public void IsBookingValid_PetsAllowed_IsValid()
+        {
+            var service = Subject();
+            _roomsRepo.Setup(x => x.GetRoom(1)).Returns(new Room
+            {
+                ArePetsAllowed = true
+            });
+
+            var isValid = service.IsBookingValid(
+                1,
+                new Booking
+                {
+                    HasPets = true
+                });
+
+            Assert.True(isValid);
         }
     }
 }

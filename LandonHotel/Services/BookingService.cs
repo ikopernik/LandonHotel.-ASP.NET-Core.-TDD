@@ -19,6 +19,13 @@ namespace LandonHotel.Services
             var guestIsBringingPets = booking.HasPets;
             var numberOfGuests = booking.NumberOfGuests;
 
+            var room = _roomsRepo.GetRoom(roomId);
+
+            if (booking.HasPets && !room.ArePetsAllowed)
+            {
+                return false;
+            }
+
             return !guestIsSmoking;
         }
 
