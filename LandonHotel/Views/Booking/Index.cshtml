@@ -34,8 +34,7 @@
                     <li><strong>Email</strong> @Html.TextBoxFor(t=>t.EmailAddress)</li>
                     <li><strong>Check-in</strong> <input type="date" name="@nameof(Model.CheckInDate)" value="@Model.CheckInDate.ToString("yyyy-MM-dd")"/></li>
                     <li><strong>Check-out</strong> <input type="date" name="@nameof(Model.CheckOutDate)" value="@Model.CheckOutDate.ToString("yyyy-MM-dd")"/></li>
-                    <li><strong>Bringing Pets?</strong> @Html.CheckBoxFor(m => m.BringingPets)</li>
-                    <li><strong>Smoking?</strong> @Html.CheckBoxFor(m => m.IsSmoking)</li>
+                    <li><strong>Coupon Code</strong> @Html.TextBoxFor(m => m.CouponCode)</li>
                 </ul>
             </section>
             <section class="checklist" id="services">

@@ -23,6 +23,8 @@ namespace LandonHotel
             // Add framework services.
             services.AddMvc();
             services.AddTransient<IRoomService, RoomService>();
+            services.AddTransient<ICouponRepository, CouponRepository>();
+
             services.AddTransient<IBookingService, BookingService>();
             services.AddTransient<IBookingsRepository, BookingsRepository>();
             services.AddTransient<IRoomsRepository, RoomsRepository>();

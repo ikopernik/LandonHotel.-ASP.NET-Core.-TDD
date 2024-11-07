@@ -5,38 +5,28 @@ namespace LandonHotel.Services
 {
     public class BookingService : IBookingService
     {
-        private readonly IBookingsRepository _bookingRepo;
-        private readonly IRoomsRepository _roomsRepo;
-        public BookingService(IBookingsRepository bookingRepo, IRoomsRepository roomsRepo)
+        private readonly IRoomsRepository _roomRepo;
+        private readonly ICouponRepository _couponRepo;
+
+        public BookingService(IRoomsRepository roomRepo, ICouponRepository couponRepo)
         {
-            _bookingRepo = bookingRepo;
-            _roomsRepo = roomsRepo;
+            _roomRepo = roomRepo;
+            _couponRepo = couponRepo;
         }
 
-        public bool IsBookingValid(int roomId, Booking booking)
+        public decimal CalculateBookingPrice(Booking booking)
         {
-            var guestIsSmoking = booking.IsSmoking;
-            var guestIsBringingPets = booking.HasPets;
-            var numberOfGuests = booking.NumberOfGuests;
+            var room = _roomRepo.GetRoom(booking.RoomId);
 
-            var room = _roomsRepo.GetRoom(roomId);
+            var numberOfNights = (booking.CheckOutDate - booking.CheckInDate).Days;
+            var price = room.Rate * numberOfNights;
 
-            if (numberOfGuests > room.Capacity)
-            {
-                return false;
-            }
+            if (string.IsNullOrEmpty(booking.CouponCode)) return price;
 
-            if (guestIsBringingPets && !room.ArePetsAllowed)
-            {
-                return false;
-            }
+            var discount = _couponRepo.GetCoupon(booking.CouponCode).PercentageDiscount;
+            price = price - (price * discount / 100);
 
-            return !guestIsSmoking;
-        }
-
-        public int CalculateBookingCost(int roomId, Booking booking)
-        {
-            return 0;
+            return price;
         }
     }
 }

@@ -10,8 +10,7 @@ namespace LandonHotel.Models
         public string EmailAddress { get; set; }
         public DateTime CheckOutDate { get; set; }
         public DateTime CheckInDate { get; set; }
-        public bool BringingPets { get; set; }
-        public bool IsSmoking { get; set; }
         public IList<Room> Rooms { get; set; }
+        public string CouponCode { get; set; }
     }
 }
